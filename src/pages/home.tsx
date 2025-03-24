@@ -26,6 +26,9 @@ axios.defaults.withCredentials = true;
 function Home() {
   const navigate = useNavigate();
 
+  const prod_api = "https://mini-social-media-backend.onrender.com/api";
+  //const dev_api = "http://localhost:9999/api";
+
   const [posts, setPost] = useState([]);
   const [logged_in, setLogged_in] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +54,7 @@ function Home() {
     }
 
     try {
-      const res = await axios.post("http://localhost:9999/api/auth/signup", {
+      const res = await axios.post(`${prod_api}/auth/signup`, {
         username,
         password,
       });
@@ -75,7 +78,7 @@ function Home() {
     }
 
     try {
-      const res = await axios.post("http://localhost:9999/api/auth/login", {
+      const res = await axios.post(`${prod_api}/auth/login`, {
         username,
         password,
       });
@@ -91,7 +94,7 @@ function Home() {
 
   async function fetch_data() {
     try {
-      const res = await axios.get("http://localhost:9999/api/post");
+      const res = await axios.get(`${prod_api}/post`);
       setPost(res?.data?.data);
     } catch (error) {
       console.log(error.message);
@@ -100,7 +103,7 @@ function Home() {
 
   async function auth_check() {
     try {
-      const res = await axios.get("http://localhost:9999/api/auth-check");
+      const res = await axios.get(`${prod_api}/auth-check`);
       setLogged_in(res?.data?.logged_in);
     } catch (error) {
       console.log(error.message);
@@ -137,7 +140,7 @@ function Home() {
               <div>
                 <Dialog open={isOpenLogin} onOpenChange={setIsOpenLogin}>
                   <DialogTrigger asChild>
-                    <Button variant="outline">Log In</Button>
+                    <Button variant="outline" className="cursor-pointer">Log In</Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -175,7 +178,7 @@ function Home() {
               <div>
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="destructive">Sign Up</Button>
+                    <Button variant="destructive" className="cursor-pointer">Sign Up</Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>

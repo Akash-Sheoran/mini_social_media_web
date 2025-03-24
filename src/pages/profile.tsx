@@ -20,11 +20,17 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 function Profile() {
+  const prod_api = "https://mini-social-media-backend.onrender.com/api";
+  //const dev_api = "http://localhost:9999/api";
+
   const navigate = useNavigate();
   const [posts, setPost] = useState([]);
   const [image, setImage] = useState(null);
   const [edit_data, setEditData] = useState(null);
   const [show_loading, setLoading] = useState(false);
+  const [user_data, setUser] = useState({
+    username: null,
+  });
 
   const [isOpen, setIsOpen] = useState(false);
   const openDialog = () => {
@@ -50,7 +56,7 @@ function Profile() {
 
   async function fetch_data() {
     try {
-      const res = await axios.get("http://localhost:9999/api/post/by-user");
+      const res = await axios.get(`${prod_api}/post/by-user`);
       setPost(res?.data?.data);
     } catch (error) {
       if (error?.response?.status == 401) {
@@ -60,8 +66,18 @@ function Profile() {
     }
   }
 
+  async function auth_check() {
+    try {
+      const res = await axios.get(`${prod_api}/auth-check`);
+      setUser(res?.data?.user_data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
   useEffect(() => {
     fetch_data();
+    auth_check();
   }, []);
 
   async function update(formData) {
@@ -70,7 +86,7 @@ function Profile() {
       const content = formData.get("content");
 
       const res = await axios.put(
-        `http://localhost:9999/api/post?_id=${edit_data?._id}`,
+        `${prod_api}/post?_id=${edit_data?._id}`,
         {
           title: title,
           content: content,
@@ -89,7 +105,7 @@ function Profile() {
 
   async function remove(id: string) {
     try {
-      const res = await axios.delete("http://localhost:9999/api/post", {
+      const res = await axios.delete(`${prod_api}/post`, {
         params: {
           _id: id,
         },
@@ -106,7 +122,7 @@ function Profile() {
       const title = formData.get("title");
       const content = formData.get("content");
 
-      const res = await axios.post("http://localhost:9999/api/post", {
+      const res = await axios.post(`${prod_api}/post`, {
         title: title,
         content: content,
         image: image,
@@ -134,7 +150,7 @@ function Profile() {
       formData.append("file", file);
 
       const res = await axios.post(
-        "http://localhost:9999/api/upload",
+        `${prod_api}/upload`,
         formData,
         {
           headers: {
@@ -191,11 +207,11 @@ function Profile() {
 
   async function logout() {
     try {
-      const res = await axios.get("http://localhost:9999/api/auth/logout");
+      const res = await axios.get(`${prod_api}/auth/logout`);
       toast.success(res?.data?.message);
       navigate_to_home();
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
   }
 
@@ -226,7 +242,8 @@ function Profile() {
               Home
             </Button>
           </div>
-          <div>
+          <div className="flex gap-3 items-center">
+            <p className="text-white px-2">Username : {user_data?.username}</p>
             <Button
               className="cursor-pointer"
               variant="destructive"
@@ -269,6 +286,7 @@ function Profile() {
                   name="file"
                   onChange={file_upload}
                   className="mt-2"
+                  required
                 />
               </div>
               <div className="py-1">
@@ -276,6 +294,7 @@ function Profile() {
                   type="text"
                   placeholder="Enter Title...."
                   name="title"
+                  required
                 ></Input>
               </div>
               <div className="py-1">
@@ -284,6 +303,7 @@ function Profile() {
                   placeholder="Enter Content...."
                   name="content"
                   className="mt-2"
+                  required
                 ></Input>
               </div>
               <Button
@@ -325,6 +345,7 @@ function Profile() {
                   placeholder="Enter Title...."
                   name="title"
                   defaultValue={edit_data?.title}
+                  required
                 ></Input>
               </div>
               <div className="py-1">
@@ -334,6 +355,7 @@ function Profile() {
                   name="content"
                   className="mt-2"
                   defaultValue={edit_data?.content}
+                  required
                 ></Input>
               </div>
               <Button
