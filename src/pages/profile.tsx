@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 
 //import { ThreeDots } from "react-loader-spinner";
+import { useLoadingBar } from "react-top-loading-bar";
 
 import axios from "axios";
 axios.defaults.withCredentials = true;
@@ -22,6 +23,11 @@ axios.defaults.withCredentials = true;
 function Profile() {
   const prod_api = "https://mini-social-media-backend.onrender.com/api";
   //const dev_api = "http://localhost:9999/api";
+
+  const { start, complete } = useLoadingBar({
+    color: "white",
+    height: 4,
+  });
 
   const navigate = useNavigate();
   const [posts, setPost] = useState([]);
@@ -56,12 +62,16 @@ function Profile() {
 
   async function fetch_data() {
     try {
+      start();
       const res = await axios.get(`${prod_api}/post/by-user`);
       setPost(res?.data?.data);
+      complete();
     } catch (error) {
+      complete();
       if (error?.response?.status == 401) {
         toast.error(error?.response?.data?.message);
         navigate_to_home();
+        complete();
       }
     }
   }
@@ -82,43 +92,47 @@ function Profile() {
 
   async function update(formData) {
     try {
+      start();
       const title = formData.get("title");
       const content = formData.get("content");
 
-      const res = await axios.put(
-        `${prod_api}/post?_id=${edit_data?._id}`,
-        {
-          title: title,
-          content: content,
-          image: image,
-        }
-      );
+      const res = await axios.put(`${prod_api}/post?_id=${edit_data?._id}`, {
+        title: title,
+        content: content,
+        image: image,
+      });
       toast.success(res?.data?.message);
       closeDialogEdit();
       fetch_data();
       setImage(null);
+      complete();
     } catch (error) {
       closeDialogEdit();
+      complete();
       toast.error(error?.response?.data?.message);
     }
   }
 
   async function remove(id: string) {
     try {
+      start();
       const res = await axios.delete(`${prod_api}/post`, {
         params: {
           _id: id,
         },
       });
+      complete();
       toast.success(res?.data?.message);
       fetch_data();
     } catch (error) {
+      complete();
       toast.error(error?.response?.data?.message);
     }
   }
 
   async function create_post(formData) {
     try {
+      start();
       const title = formData.get("title");
       const content = formData.get("content");
 
@@ -128,10 +142,12 @@ function Profile() {
         image: image,
       });
       toast.success(res?.data?.message);
+      complete();
       fetch_data();
       closeDialog();
       setImage(null);
     } catch (error) {
+      complete();
       closeDialog();
       //console.log(error);
       toast.error(error?.response?.data?.message);
@@ -142,6 +158,7 @@ function Profile() {
 
   async function file_upload(event) {
     try {
+      start();
       setLoading(true);
       const file = event.target.files[0];
       setImage(file);
@@ -149,23 +166,21 @@ function Profile() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await axios.post(
-        `${prod_api}/upload`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const res = await axios.post(`${prod_api}/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setImage(res?.data?.result);
       setEditData((prev) => ({
         ...prev,
         image: res?.data?.result,
       }));
       setLoading(false);
+      complete();
       toast.success("file uploaded successfully");
     } catch (error) {
+       complete();
       toast.error(error?.response?.data?.message);
       setLoading(false);
     }
@@ -207,10 +222,13 @@ function Profile() {
 
   async function logout() {
     try {
+      start();
       const res = await axios.get(`${prod_api}/auth/logout`);
       toast.success(res?.data?.message);
       navigate_to_home();
+      complete();
     } catch (error) {
+      complete();
       console.log(error);
     }
   }

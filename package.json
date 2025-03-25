@@ -22,6 +22,7 @@
     "react-dom": "^19.0.0",
     "react-loader-spinner": "^6.1.6",
     "react-router-dom": "^7.4.0",
+    "react-top-loading-bar": "^3.0.2",
     "sonner": "^2.0.1",
     "sweetalert2": "^11.17.2",
     "tailwind-merge": "^3.0.2",

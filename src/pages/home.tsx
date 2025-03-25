@@ -17,6 +17,7 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 
 import { toast } from "sonner";
+import { useLoadingBar } from "react-top-loading-bar";
 
 import axios from "axios";
 axios.defaults.withCredentials = true;
@@ -25,6 +26,11 @@ axios.defaults.withCredentials = true;
 
 function Home() {
   const navigate = useNavigate();
+
+  const { start, complete } = useLoadingBar({
+    color: "white",
+    height: 4,
+  });
 
   const prod_api = "https://mini-social-media-backend.onrender.com/api";
   //const dev_api = "http://localhost:9999/api";
@@ -44,12 +50,14 @@ function Home() {
 
   async function sign_up(formData) {
     //console.log(formData);
+    start();
     const username = formData.get("username");
     const password = formData.get("password");
     // console.log(username, "-----", password);
 
     if (!username || !password) {
       toast.warning("All Fields are required");
+      complete();
       return;
     }
 
@@ -61,13 +69,15 @@ function Home() {
 
       toast.success(res?.data?.message);
       closeDialog();
+      complete();
     } catch (error) {
-     
+      complete();
       toast.error(error?.response?.data?.message);
     }
   }
 
   async function login(formData) {
+    start();
     const username = formData.get("username");
     const password = formData.get("password");
     // console.log(username, "-----", password);
@@ -86,18 +96,22 @@ function Home() {
       toast.success(res?.data?.message);
       closeDialogLogin();
       route_to_profile();
+      complete();
     } catch (error) {
       toast.error(error?.response?.data?.message);
-    
+      complete();
     }
   }
 
   async function fetch_data() {
+    start();
     try {
       const res = await axios.get(`${prod_api}/post`);
       setPost(res?.data?.data);
+      complete();
     } catch (error) {
       console.log(error.message);
+      complete();
     }
   }
 
